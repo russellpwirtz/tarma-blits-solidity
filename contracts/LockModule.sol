@@ -34,15 +34,6 @@ contract LockModule is ILockModule {
         IERC20 paymentToken,
         uint256 cost
     ) external override returns (bool success) {
-        require(
-            nftContract.balanceOf(msg.sender, tokenId) > 0,
-            "ILockModule: Invalid token owner"
-        );
-        require(
-            paymentToken.balanceOf(msg.sender) >= cost,
-            "ILockModule: Insufficient balance for unlockCost"
-        );
-
         nftToPaymentToken[address(nftContract)][tokenId] = address(
             paymentToken
         );
