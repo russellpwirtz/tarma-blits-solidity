@@ -6,16 +6,19 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
- * @title NFTLocker
+ * @title LockModule
  * @dev This contract allows users to lock ERC1155 tokens and unlock them by paying
  * with an ERC20 token. The contract defines what ERC20 payment will be required to later unlock.
  */
 contract LockModule is ILockModule {
-    mapping(address => mapping(uint256 => address)) public nftToPaymentToken;
-    mapping(address => mapping(uint256 => mapping(address => uint256)))
-        public nftToUnlockCost;
-    mapping(address => mapping(uint256 => mapping(address => uint256)))
-        public nftToUnlockDate;
+    struct Lock {
+        uint256 _unlockCost;
+        bool _isLocked;
+        uint256 _unlockDate;
+        address _paymentTokenAddress;
+    }
+
+    mapping(address => mapping(uint256 => Lock)) locks;
 
     /**
      * @dev This initializes the lock and emits an event. It defines the contract of the NFT
@@ -34,10 +37,17 @@ contract LockModule is ILockModule {
         IERC20 paymentToken,
         uint256 cost
     ) external override returns (bool success) {
-        nftToPaymentToken[address(nftContract)][tokenId] = address(
-            paymentToken
+        require(
+            locks[address(nftContract)][tokenId]._isLocked == false,
+            "already locked"
         );
-        nftToUnlockCost[address(nftContract)][tokenId][msg.sender] = cost;
+
+        locks[address(nftContract)][tokenId] = Lock({
+            _unlockCost: cost,
+            _isLocked: true,
+            _unlockDate: 0,
+            _paymentTokenAddress: address(paymentToken)
+        });
 
         emit Initialized(
             address(nftContract),
@@ -46,6 +56,7 @@ contract LockModule is ILockModule {
             cost,
             msg.sender
         );
+
         return true;
     }
 
@@ -60,69 +71,62 @@ contract LockModule is ILockModule {
         IERC1155 nftContract,
         uint256 tokenId
     ) external override returns (bool success) {
+        Lock storage lockObj = locks[address(nftContract)][tokenId];
+        require(lockObj._isLocked == true, "not locked");
+        require(lockObj._unlockDate == 0, "already unlocked");
+
+        IERC20 paymentToken = IERC20(lockObj._paymentTokenAddress);
         require(
-            isLocked(msg.sender, tokenId),
-            "ILockModule: Token is not locked"
+            paymentToken.transferFrom(
+                msg.sender,
+                address(this),
+                lockObj._unlockCost
+            )
         );
-        uint256 cost = unlockCost(msg.sender, tokenId);
-        IERC20 paymentToken = IERC20(
-            nftToPaymentToken[address(nftContract)][tokenId]
-        );
-        require(
-            paymentToken.allowance(msg.sender, address(this)) >= cost,
-            "ILockModule: Insufficient allowance for payment"
-        );
-        require(
-            paymentToken.balanceOf(msg.sender) >= cost,
-            "ILockModule: Insufficient balance for payment"
-        );
-        require(
-            paymentToken.transferFrom(msg.sender, address(this), cost),
-            "ILockModule: Payment transfer failed"
-        );
-        nftToUnlockDate[address(nftContract)][tokenId][msg.sender] = block
-            .timestamp;
+
+        lockObj._unlockDate = block.timestamp;
+
         emit Unlocked(msg.sender, tokenId, block.timestamp);
+
         return true;
     }
 
     /**
      * @dev Checks whether or not an NFT is still locked.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContract The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return 'true' if the token is locked, 'false' otherwise.
      */
     function isLocked(
-        address sender,
+        address nftContract,
         uint256 tokenId
-    ) public view override returns (bool result) {
-        return (nftToUnlockCost[msg.sender][tokenId][sender] != 0 &&
-            nftToUnlockDate[msg.sender][tokenId][sender] == 0);
+    ) external view override returns (bool result) {
+        return locks[nftContract][tokenId]._isLocked;
     }
 
     /**
      * @dev Returns the cost of the ERC20 token to unlock the ERC1155 token.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContract The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return the cost of the ERC20 token as uint256.
      */
     function unlockCost(
-        address sender,
+        address nftContract,
         uint256 tokenId
-    ) public view override returns (uint256 result) {
-        return nftToUnlockCost[msg.sender][tokenId][sender];
+    ) external view override returns (uint256 result) {
+        return locks[nftContract][tokenId]._unlockCost;
     }
 
     /**
      * @dev Returns the date the token was unlocked.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContract The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return the date the token was unlocked as uint256.
      */
     function getDateUnlocked(
-        address sender,
+        address nftContract,
         uint256 tokenId
     ) external view override returns (uint256 result) {
-        return nftToUnlockDate[msg.sender][tokenId][sender];
+        return locks[nftContract][tokenId]._unlockDate;
     }
 }
