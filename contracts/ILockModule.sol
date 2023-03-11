@@ -42,34 +42,34 @@ interface ILockModule {
 
     /**
      * @dev Checks whether or not an NFT is still locked.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContractAddress The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return 'true' if the token is locked, 'false' otherwise.
      */
     function isLocked(
-        address sender,
+        address nftContractAddress,
         uint256 tokenId
     ) external view returns (bool result);
 
     /**
      * @dev Returns the cost of the ERC20 token to unlock the ERC1155 token.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContractAddress The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return the cost of the ERC20 token as uint256.
      */
     function unlockCost(
-        address sender,
+        address nftContractAddress,
         uint256 tokenId
     ) external view returns (uint256 result);
 
     /**
      * @dev Returns the date the token was unlocked.
-     * @param sender The address of the sender who locked the NFT.
+     * @param nftContractAddress The address of the NFT contract.
      * @param tokenId The ID of the ERC1155 token to unlock.
      * @return result Return the date the token was unlocked as uint256.
      */
     function getDateUnlocked(
-        address sender,
+        address nftContractAddress,
         uint256 tokenId
     ) external view returns (uint256 result);
 

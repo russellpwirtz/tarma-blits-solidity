@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 // import "./IHappinessModule.sol";
 import "./ILockModule.sol";
-// import "./ICheckinModule.sol";
+import "./ICheckinModule.sol";
 import "hardhat/console.sol";
 
 contract Tarma is ERC1155, Ownable, ReentrancyGuard {
@@ -18,7 +18,7 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
     IERC20 public blit;
     // address happinessModuleAddress;
     address lockModuleAddress;
-    // address checkinModuleAddress;
+    address checkinModuleAddress;
 
     uint256 constant MILLIS_PER_DAY = 86400000;
     uint256 constant BLIT_BALANCE_INITIAL_CREDIT = 100;
@@ -31,7 +31,7 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
         TarmaStates tarmaState;
         // IHappinessModule happinessModule;
         ILockModule lockModule;
-        // ICheckinModule checkinModule;
+        ICheckinModule checkinModule;
     }
 
     struct Memories {
@@ -52,11 +52,15 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
     mapping(address => TarmaCollectible[]) public playerTarmas;
     uint256 public tarmasCreated;
 
-    constructor(address _blitAddress, address _lockModuleAddress) ERC1155("") {
+    constructor(
+        address _blitAddress,
+        address _lockModuleAddress,
+        address _checkinModuleAddress
+    ) ERC1155("") {
         blit = IERC20(_blitAddress);
         // happinessModuleAddress = _happinessModuleAddress;
         lockModuleAddress = _lockModuleAddress;
-        // checkinModuleAddress = _checkinModuleAddress;
+        checkinModuleAddress = _checkinModuleAddress;
     }
 
     /**
@@ -67,27 +71,27 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
         address _sender = msg.sender;
         require(playerTarmas[_sender].length > 0, "No Tarmas found");
 
-        // TarmaCollectible storage _tarma = playerTarmas[_sender][tarmId];
+        TarmaCollectible storage _tarma = playerTarmas[_sender][tarmId];
 
-        // uint256 _blitEarned = _tarma.checkinModule.checkin(
-        //     _sender,
-        //     tarmId,
-        //     _tarma.multiplier,
-        //     // _tarma.happinessModule.getHappinessLevel()
-        //     1,
-        //     1,
-        //     1
-        // ); // TODO
+        uint256 _blitEarned = _tarma.checkinModule.checkin(
+            IERC1155(this),
+            tarmId,
+            _tarma.multiplier,
+            // _tarma.happinessModule.getHappinessLevel()
+            1,
+            1,
+            1
+        ); // TODO
 
-        // string memory _blitEarnedString = Strings.toString(_blitEarned);
-        // console.log("About to send blit: ", _blitEarnedString);
-        // uint256 _amountHeld = blit.balanceOf(_sender);
-        // string memory _blitHeldString = Strings.toString(_amountHeld);
-        // console.log("Held blit: ", _blitHeldString);
+        string memory _blitEarnedString = Strings.toString(_blitEarned);
+        console.log("About to send blit: ", _blitEarnedString);
+        uint256 _amountHeld = blit.balanceOf(_sender);
+        string memory _blitHeldString = Strings.toString(_amountHeld);
+        console.log("Held blit: ", _blitHeldString);
 
-        // if (_blitEarned > 0) {
-        //     blit.transfer(_sender, _blitEarned);
-        // }
+        if (_blitEarned > 0) {
+            blit.transfer(_sender, _blitEarned);
+        }
     }
 
     /**
@@ -113,7 +117,8 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
                 energy: 1
             }),
             tarmaState: TarmaStates.baby,
-            lockModule: ILockModule(lockModuleAddress)
+            lockModule: ILockModule(lockModuleAddress),
+            checkinModule: ICheckinModule(checkinModuleAddress)
         });
 
         playerTarmas[recipientAddress].push(_tarma);

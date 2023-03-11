@@ -14,7 +14,7 @@ contract("LockModule", (accounts) => {
   beforeEach(async () => {
     erc20 = await Blit.new();
     lockModule = await LockModule.new();
-    nft = await Tarma.new(erc20.address, lockModule.address);
+    nft = await Tarma.new(erc20.address, lockModule.address, lockModule.address);
     await erc20.approve(lockModule.address, cost, { from: accounts[0] });
     await erc20.mint(accounts[0], cost);
     await nft.createTarma("asdf", 0, nftAmount, accounts[0]);
