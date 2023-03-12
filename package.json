@@ -3,6 +3,7 @@
     "@openzeppelin/contracts": "^4.8.2",
     "chai": "^4.3.7",
     "hardhat": "^2.13.0",
+    "truffle-assert": "^0.9.1",
     "truffle-resolver": "^5.0.16"
   }
 }

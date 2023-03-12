@@ -3,6 +3,7 @@ const { expect } = require("chai");
 const CheckinModule = artifacts.require("CheckinModule");
 const Blit = artifacts.require("Blit");
 const Tarma = artifacts.require("Tarma");
+const truffleAssert = require('truffle-assert');
 
 contract("CheckinModule", (accounts) => {
   const [owner, user] = accounts;
@@ -28,20 +29,18 @@ contract("CheckinModule", (accounts) => {
     }
   });
 
-  // it("should transfer reward to the user", async () => {
-  //   const happy = 3;
-  //   const disciplined = 2;
-  //   const energy = 1;
+  it("should transfer reward to the user", async () => {
+    const happy = 3;
+    const disciplined = 2;
+    const energy = 1;
+    const multiplier = 2;
 
-  //   const reward = await checkinModule.checkin(ierc1155Token.address, 1, 2, happy, disciplined, energy, { from: user });
+    const expectedReward = (happy * 2 + disciplined * 3 + energy) * multiplier;
 
-  //   const expectedReward = happy * 2 + disciplined * 3 + energy;
+    const reward = await checkinModule.checkin(ierc1155Token.address, 1, multiplier, happy, disciplined, energy, { from: user });
 
-  //   console.log(reward);
-
-  //   expect(reward.toNumber()).to.equal(expectedReward * 2);
-
-  //   const balance = await erc20Token.balanceOf(user);
-  //   expect(balance.toNumber()).to.equal(reward.toNumber());
-  // });
+    truffleAssert.eventEmitted(reward, 'CheckedIn', (args) => {
+      return args.amountEarned == expectedReward;
+    });
+  });
 });
