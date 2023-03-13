@@ -30,7 +30,7 @@ contract CheckinModule is ICheckinModule {
         uint256 happy,
         uint256 disciplined,
         uint256 energy
-    ) external override returns (uint256) {
+    ) external override onlyNFTOwner(nftContract, tokenId) returns (uint256) {
         require(happy >= 1 && happy <= 5, "Invalid happiness value");
         require(
             disciplined >= 1 && disciplined <= 5,
@@ -83,5 +83,10 @@ contract CheckinModule is ICheckinModule {
         uint256 energy
     ) internal pure returns (uint256) {
         return happy.mul(2).add(disciplined.mul(3)).add(energy);
+    }
+
+    modifier onlyNFTOwner(IERC1155 nftContract, uint256 tokenId) {
+        require(nftContract.balanceOf(msg.sender, tokenId) > 0);
+        _;
     }
 }

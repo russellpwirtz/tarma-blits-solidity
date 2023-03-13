@@ -1,7 +1,7 @@
 
 const LockModule = artifacts.require("LockModule");
 const Blit = artifacts.require("Blit"); // ERC20
-const Tarma = artifacts.require("Tarma"); // ERC1155
+const ERC1155Token = artifacts.require("ERC1155Token"); // ERC1155
 
 contract("LockModule", (accounts) => {
   let lockModule;
@@ -13,11 +13,12 @@ contract("LockModule", (accounts) => {
 
   beforeEach(async () => {
     erc20 = await Blit.new();
-    lockModule = await LockModule.new();
-    nft = await Tarma.new(erc20.address, lockModule.address, lockModule.address);
+    lockModule = await LockModule.new({ from: accounts[0] });
+    nft = await ERC1155Token.new();
     await erc20.approve(lockModule.address, cost, { from: accounts[0] });
     await erc20.mint(accounts[0], cost);
-    await nft.createTarma("asdf", 0, nftAmount, accounts[0]);
+    await nft.mint(accounts[0], 0);
+
     await lockModule.initialize(nft.address, tokenId, erc20.address, cost, { from: accounts[0] });
   });
 
