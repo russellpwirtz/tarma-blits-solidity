@@ -18,9 +18,11 @@ contract CheckinModule is ICheckinModule {
     mapping(address => uint256) private totalTokensEarned;
 
     ERC20 public paymentToken;
+    uint checkinCooldown;
 
-    constructor(address _paymentToken) {
+    constructor(address _paymentToken, uint _checkinCooldown) {
         paymentToken = ERC20(_paymentToken);
+        checkinCooldown = _checkinCooldown;
     }
 
     function checkin(
@@ -41,12 +43,21 @@ contract CheckinModule is ICheckinModule {
         address sender = msg.sender;
         uint256 lastCheckin = getLastCheckin(nftContract, tokenId);
 
-        require(
-            block.timestamp > lastCheckin.add(1 days),
-            "Already checked in today"
-        );
+        if (checkinCooldown > 0) {
+            require(
+                block.timestamp > lastCheckin.add(checkinCooldown),
+                "Already checked in today"
+            );
+        }
 
-        uint256 reward = getReward(happy, disciplined, energy).mul(multiplier);
+        uint256 reward = 0;
+        if (lastCheckin == 0) {
+            // initial checkin
+            reward = 100;
+        } else {
+            reward = getReward(happy, disciplined, energy).mul(multiplier);
+        }
+
         checkins[address(nftContract)][tokenId] = CheckinRecord(
             block.timestamp,
             reward

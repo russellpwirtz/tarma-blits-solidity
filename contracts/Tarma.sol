@@ -73,25 +73,24 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
 
         TarmaCollectible storage _tarma = playerTarmas[_sender][tarmId];
 
-        uint256 _blitEarned = _tarma.checkinModule.checkin(
+        _tarma.checkinModule.checkin(
             IERC1155(this),
             tarmId,
             _tarma.multiplier,
-            // _tarma.happinessModule.getHappinessLevel()
-            1,
+            1, // _tarma.happinessModule.getHappinessLevel()
             1,
             1
-        ); // TODO
+        );
 
-        string memory _blitEarnedString = Strings.toString(_blitEarned);
-        console.log("About to send blit: ", _blitEarnedString);
-        uint256 _amountHeld = blit.balanceOf(_sender);
-        string memory _blitHeldString = Strings.toString(_amountHeld);
-        console.log("Held blit: ", _blitHeldString);
+        // string memory _blitEarnedString = Strings.toString(_blitEarned);
+        // console.log("About to send blit: ", _blitEarnedString);
+        // uint256 _amountHeld = blit.balanceOf(_sender);
+        // string memory _blitHeldString = Strings.toString(_amountHeld);
+        // console.log("Held blit: ", _blitHeldString);
 
-        if (_blitEarned > 0) {
-            blit.transfer(_sender, _blitEarned);
-        }
+        // if (_blitEarned > 0) {
+        //     blit.transfer(_sender, _blitEarned);
+        // }
     }
 
     /**

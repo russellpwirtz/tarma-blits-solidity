@@ -9,27 +9,29 @@ To get started with Tarma Blits, you will need to have access to a web3 enabled 
 
 ## Interacting with your Pet
 
-Once you have accessed the game, you will be able to create a new pet and start interacting with it. Your pet will have three main attributes: happiness, discipline, and energy. You can interact with your pet in various ways to improve these attributes and help your pet grow and thrive.
+Once you have accessed the game, you will be able to create a new pet and start interacting with it. Your pet will have three main attributes: happiness, discipline, and energy. You can interact with your pet in various ways to improve these attributes and help your pet grow and thrive. Over time your pet will earn more daily checkin tokens but will require more activity to progress.
 
-`Daily Check-In`
+`Daily Check-In` T+++
 
-Players can earn tokens by completing a daily check-in. By checking in each day, players can earn tokens, allowing them to further care for their pet.
+Players can earn tokens by completing a daily check-in. These tokens can then be used to perform various activities:
 
-`Feeding your Pet` E+ H+ D-
+`Feeding your Pet` E++ H+ D- T-
 
 Your pet will need to eat to maintain its energy levels, which will also increase its happiness (but might cause some discipline to slip). You can feed your pet by clicking on the food icon and spending some tokens. Just don't feed it too much!
 
-`Playing with your Pet` E- H+ D+
+`Playing with your Pet` E- H++ D+ T-
 
-Playing with your pet is a great way to improve its happiness and discipline levels. You can play with your pet by clicking on the play icon and spending some tokens, which will also burn some of your pet's energy in the process.
+Playing with your pet is a great way to improve its happiness and discipline levels, at the cost of energy. Example games: hide-n-seek, fetch, walk, memory, rhythm game
 
-`Disciplining your Pet` E+ H- D+
+`Training your Pet` E+ H- D++ T-
 
-Disciplining your pet is important to maintain its discipline levels and prevent it from misbehaving. If you see your pet acting badly, you can discipline your pet by clicking on the discipline icon and spending some tokens. Be careful though, if you discipline your pet for no good reason, it can do more harm than good!
+> Legend: E:energy H:happiness D:discipline T:tokens
 
-`Special Events` E+ H+ D+
+Training your pet is important to maintain its discipline levels and prevent it from misbehaving. To increase your pet's discipline, you can train your pet, or if you see your pet acting badly you can scold your pet. Be careful though, if you discipline your pet for no good reason, it can do more harm than good!
 
-Occasionally special events will occur. Interact with your pet during the event to get rewards!
+`Special Events` E++ H++ D++
+
+Occasionally special events will happen at random intervals, which give players a chance to earn extra tokens or boost their pet's attributes. 
 
 ## Solidity Code
 
@@ -42,3 +44,7 @@ Tarma Blits is an open-source project and contributions are welcome. If you woul
 ## License
 
 Tarma Blits is released under the MIT License. See the LICENSE file for more details.
+
+## TODO
+- Different types of pets with unique attributes and personalities, which would give players more options to choose from and add variety to the game.
+
