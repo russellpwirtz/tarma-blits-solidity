@@ -30,10 +30,6 @@ contract("CheckinModule", (accounts) => {
     }
   });
 
-  it("should fail for this test", async () => {
-    assert(false);
-  });
-
   it("should transfer reward to the user", async () => {
     const tokenId = 0;
     const happy = 3;
