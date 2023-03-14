@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./ICheckinModule.sol";
@@ -17,22 +17,28 @@ contract CheckinModule is ICheckinModule {
     mapping(address => mapping(uint256 => CheckinRecord)) private checkins;
     mapping(address => uint256) private totalTokensEarned;
 
-    ERC20 public paymentToken;
+    IERC20 public paymentToken;
     uint checkinCooldown;
 
     constructor(address _paymentToken, uint _checkinCooldown) {
-        paymentToken = ERC20(_paymentToken);
+        paymentToken = IERC20(_paymentToken);
         checkinCooldown = _checkinCooldown;
     }
 
     function checkin(
         IERC1155 nftContract,
         uint256 tokenId,
+        address sender,
         uint256 multiplier,
         uint256 happy,
         uint256 disciplined,
         uint256 energy
-    ) external override onlyNFTOwner(nftContract, tokenId) returns (uint256) {
+    )
+        external
+        override
+        onlyNFTOwner(nftContract, tokenId, sender)
+        returns (uint256)
+    {
         require(happy >= 1 && happy <= 5, "Invalid happiness value");
         require(
             disciplined >= 1 && disciplined <= 5,
@@ -40,7 +46,6 @@ contract CheckinModule is ICheckinModule {
         );
         require(energy >= 1 && energy <= 5, "Invalid energy value");
 
-        address sender = msg.sender;
         uint256 lastCheckin = getLastCheckin(nftContract, tokenId);
 
         if (checkinCooldown > 0) {
@@ -84,8 +89,10 @@ contract CheckinModule is ICheckinModule {
         return checkins[address(nftContract)][tokenId].timestamp;
     }
 
-    function getCumulativeEarned() public view override returns (uint256) {
-        return totalTokensEarned[msg.sender];
+    function getCumulativeEarned(
+        address sender
+    ) public view override returns (uint256) {
+        return totalTokensEarned[sender];
     }
 
     function getReward(
@@ -96,8 +103,15 @@ contract CheckinModule is ICheckinModule {
         return happy.mul(2).add(disciplined.mul(3)).add(energy);
     }
 
-    modifier onlyNFTOwner(IERC1155 nftContract, uint256 tokenId) {
-        require(nftContract.balanceOf(msg.sender, tokenId) > 0);
+    modifier onlyNFTOwner(
+        IERC1155 nftContract,
+        uint256 tokenId,
+        address sender
+    ) {
+        require(
+            nftContract.balanceOf(sender, tokenId) > 0,
+            "Wasn't the owner!"
+        );
         _;
     }
 }

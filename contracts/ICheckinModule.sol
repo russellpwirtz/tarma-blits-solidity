@@ -16,6 +16,7 @@ interface ICheckinModule {
      *
      * @param nftContract The ERC1155 contract address.
      * @param tokenId The token ID to be checked in.
+     * @param sender The owner of the NFT to be checked in
      * @param multiplier The amount of tokens earned for this checkin. A multiplier can be set for special events, promotions or any other reason.
      * @param happy A value between 1-5 representing the level of happiness of the user when doing the checkin.
      * @param disciplined A value between 1-5 representing the level of discipline of the user when doing the checkin.
@@ -25,6 +26,7 @@ interface ICheckinModule {
     function checkin(
         IERC1155 nftContract,
         uint256 tokenId,
+        address sender,
         uint256 multiplier,
         uint256 happy,
         uint256 disciplined,
@@ -47,7 +49,9 @@ interface ICheckinModule {
      * @dev Gets the total amount of tokens earned by the user since the contract creation.
      * @return uint256 The total number of tokens earned by the user.
      */
-    function getCumulativeEarned() external view returns (uint256);
+    function getCumulativeEarned(
+        address sender
+    ) external view returns (uint256);
 
     /**
      * @dev Emitted when a checkin is performed.

@@ -26,10 +26,10 @@ contract("CheckinModule", (accounts) => {
   });
 
   it("should revert if checkin has already been made today", async () => {
-    await dailyCheckinModule.checkin(erc1155Token.address, 0, 2, 3, 4, 5, { from: user });
+    await dailyCheckinModule.checkin(erc1155Token.address, 0, user, 2, 3, 4, 5, { from: user });
 
     try {
-      await dailyCheckinModule.checkin(erc1155Token.address, 0, 2, 3, 4, 5, { from: user });
+      await dailyCheckinModule.checkin(erc1155Token.address, 0, user, 2, 3, 4, 5, { from: user });
     } catch (error) {
       assert.equal(error.message.includes("Already checked in today"), true, "Wasn't already checked in today");
       return;
@@ -44,7 +44,7 @@ contract("CheckinModule", (accounts) => {
     const multiplier = 2;
 
     const expectedReward = 100; // initial reward
-    const reward = await dailyCheckinModule.checkin(erc1155Token.address, tokenId, multiplier, happy, disciplined, energy, { from: user });
+    const reward = await dailyCheckinModule.checkin(erc1155Token.address, tokenId, user, multiplier, happy, disciplined, energy, { from: user });
     truffleAssert.eventEmitted(reward, 'CheckedIn', (args) => {
       return args.amountEarned == expectedReward
         && args.address == user.address
@@ -61,7 +61,7 @@ contract("CheckinModule", (accounts) => {
 
     // initial checkin
     let expectedReward = 100;
-    let reward = await instantCheckinModule.checkin(erc1155Token.address, tokenId, multiplier, happy, disciplined, energy, { from: user });
+    let reward = await instantCheckinModule.checkin(erc1155Token.address, tokenId, user, multiplier, happy, disciplined, energy, { from: user });
     truffleAssert.eventEmitted(reward, 'CheckedIn', (args) => {
       return args.amountEarned == expectedReward
         && args.address == user.address
@@ -70,7 +70,7 @@ contract("CheckinModule", (accounts) => {
 
     // second checkin
     expectedReward = (happy * 2 + disciplined * 3 + energy) * multiplier;
-    reward = await instantCheckinModule.checkin(erc1155Token.address, tokenId, multiplier, happy, disciplined, energy, { from: user });
+    reward = await instantCheckinModule.checkin(erc1155Token.address, tokenId, user, multiplier, happy, disciplined, energy, { from: user });
     truffleAssert.eventEmitted(reward, 'CheckedIn', (args) => {
       return args.amountEarned == expectedReward
         && args.address == user.address

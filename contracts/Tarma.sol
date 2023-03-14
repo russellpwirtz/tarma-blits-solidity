@@ -67,30 +67,23 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
      * Public Functions
      */
 
-    function checkin(uint256 tarmId) public nonReentrant {
+    function checkin(uint256 tarmaIndex) public nonReentrant {
         address _sender = msg.sender;
         require(playerTarmas[_sender].length > 0, "No Tarmas found");
 
-        TarmaCollectible storage _tarma = playerTarmas[_sender][tarmId];
+        TarmaCollectible storage _tarma = playerTarmas[_sender][tarmaIndex];
 
-        _tarma.checkinModule.checkin(
+        uint256 amount = _tarma.checkinModule.checkin(
             IERC1155(this),
-            tarmId,
+            _tarma.id,
+            _sender,
             _tarma.multiplier,
             1, // _tarma.happinessModule.getHappinessLevel()
             1,
             1
         );
 
-        // string memory _blitEarnedString = Strings.toString(_blitEarned);
-        // console.log("About to send blit: ", _blitEarnedString);
-        // uint256 _amountHeld = blit.balanceOf(_sender);
-        // string memory _blitHeldString = Strings.toString(_amountHeld);
-        // console.log("Held blit: ", _blitHeldString);
-
-        // if (_blitEarned > 0) {
-        //     blit.transfer(_sender, _blitEarned);
-        // }
+        emit TarmaCheckedIn(_sender, _tarma.id, amount);
     }
 
     /**
@@ -122,12 +115,7 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
 
         playerTarmas[recipientAddress].push(_tarma);
 
-        _tarma.lockModule.initialize(
-            IERC1155(this),
-            (playerTarmas[recipientAddress].length) - 1,
-            blit,
-            0
-        );
+        _tarma.lockModule.initialize(IERC1155(this), tarmasCreated, blit, 0);
 
         _mint(recipientAddress, tarmasCreated, 1, "");
 
@@ -143,7 +131,7 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
     function unlock(uint256 tarmaId) public nonReentrant {
         TarmaCollectible storage _tarma = playerTarmas[msg.sender][tarmaId];
 
-        _tarma.lockModule.unlock(IERC1155(this), tarmaId);
+        _tarma.lockModule.unlock(IERC1155(this), _tarma.id);
 
         playerTarmas[msg.sender][tarmaId] = _tarma;
 
@@ -157,9 +145,14 @@ contract Tarma is ERC1155, Ownable, ReentrancyGuard {
     event TarmaCreated(
         address indexed owner,
         string name,
-        uint256 nftId,
+        uint256 tokenId,
         uint256 cost,
         uint256 multiplier
     );
-    event TarmaUnlocked(address indexed owner, uint256 nftId);
+    event TarmaUnlocked(address indexed owner, uint256 tokenId);
+    event TarmaCheckedIn(
+        address indexed owner,
+        uint256 tokenId,
+        uint256 amountEarned
+    );
 }
